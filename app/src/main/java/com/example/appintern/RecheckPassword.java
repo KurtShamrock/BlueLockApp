@@ -65,8 +65,13 @@ public class RecheckPassword extends AppCompatActivity {
                     if(withinRadius) {
                         try {
                             saveNewPassword();
+                            Intent intent = new Intent();
+                            RecheckPassword.this.setResult(RESULT_OK, intent);
                             finish();
                         } catch (Exception e) {
+                            Intent intent = new Intent();
+                            RecheckPassword.this.setResult(RESULT_OK, intent);
+                            finish();
                             e.printStackTrace();
                         }
                     }

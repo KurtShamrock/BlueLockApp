@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -78,9 +79,20 @@ public class NewPassword extends AppCompatActivity {
     private void goToRecheckCoordinates() {
         Intent intent = new Intent(this, RecheckPassword.class);
         intent.putExtra("CoordinateList", new ArrayList<>(coordinateList));
-        startActivity(intent);
-        finish();
+        startActivityForResult(intent,12345);
+
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==12345){
+            Intent intent = new Intent();
+            this.setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
     private void drawCircleAroundPoint(Point point) {
         ImageView imageView = findViewById(R.id.touch_img);
         Bitmap bitmap = Bitmap.createBitmap(imageView.getWidth(), imageView.getHeight(), Bitmap.Config.ARGB_8888);

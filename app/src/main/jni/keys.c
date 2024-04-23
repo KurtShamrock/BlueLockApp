@@ -12,3 +12,9 @@ JNIEXPORT jstring JNICALL
 Java_com_example_appintern_EnterPassword_getKeys(JNIEnv *env, jobject thiz) {
     return (*env)->NewStringUTF(env, "not a password");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_example_appintern_OverlayService_getKeys(JNIEnv *env, jclass clazz) {
+    // TODO: implement getKeys()
+    return (*env)->NewStringUTF(env, "not a password");
+}

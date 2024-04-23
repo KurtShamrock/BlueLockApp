@@ -2,14 +2,18 @@ package com.example.appintern;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
@@ -23,6 +27,7 @@ public class WallpaperApp extends AppCompatActivity {
     Adapter adapter;
     EditText editText;
     ImageButton search;
+    BottomNavigationView bnv;
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wallpaper_app);
@@ -47,6 +52,26 @@ public class WallpaperApp extends AppCompatActivity {
                 else{
                     getSearchImage(query);
                 }
+            }
+        });
+        bnv=findViewById(R.id.nav);
+
+        bnv.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                int itemId=menuItem.getItemId();
+                if(itemId==R.id.wallpaper){
+                    startActivity(new Intent(getApplicationContext(), WallpaperApp.class));
+                    return true;
+                } else if(itemId==R.id.setPass){
+                    startActivity(new Intent(getApplicationContext(), HomePass.class));
+                    return true;
+                } else if(itemId==R.id.gallery){
+//                        startActivity(new Intent(getApplicationContext(),));
+                    return true;
+                }
+                return false;
+
             }
         });
     }

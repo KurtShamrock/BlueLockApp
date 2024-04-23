@@ -1,5 +1,8 @@
 package com.example.appintern;
+
+
 import android.annotation.SuppressLint;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,18 +10,20 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.Nullable;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -29,8 +34,15 @@ import java.util.regex.Pattern;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-public class EnterPassword extends AppCompatActivity {
-    private static final String DEBUGTAG = "JWP";
+public class OverlayService extends Service {
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+    private WindowManager windowManager;
+    private View overlayView;
+    private static final String DEBUGTAG = "JWP OverLay";
     static {
         System.loadLibrary("keys");
     }
@@ -40,17 +52,45 @@ public class EnterPassword extends AppCompatActivity {
     private static final int MAX_COORDINATES = 4;
     private List<Point> coordinateList;
     private List<Point> coordinatePassword = new ArrayList<>();
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.enter_password);
-        coordinateList = new ArrayList<>();
-        addTouchListener();
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        showOverlay();
+        Log.i("Check","start");
+        return START_STICKY;
     }
 
+    @SuppressLint("InflateParams")
+    private void showOverlay() {
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                PixelFormat.OPAQUE);
+        params.x=0;
+        params.y=0;
+        LayoutInflater inflater = LayoutInflater.from(this);
+        overlayView = inflater.inflate(R.layout.overlay_layout, null);
+        coordinateList = new ArrayList<>();
+        addTouchListener();
+        // Button to dismiss the overlay view
+//        Button dismissButton = overlayView.findViewById(R.id.dismissButton);
+//        dismissButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // Dismiss the overlay view
+//                dismissOverlay();
+//            }
+//        });
+
+
+        windowManager.addView(overlayView, params);
+    }
     @SuppressLint("ClickableViewAccessibility")
     private void addTouchListener() {
-        ImageView image = (ImageView)findViewById((R.id.touch_img));
+        ImageView image = (ImageView)overlayView.findViewById((R.id.touch_img));
         image.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 int x = (int)event.getX();
@@ -63,14 +103,10 @@ public class EnterPassword extends AppCompatActivity {
                         boolean isPass = CheckPassword();
                         if(isPass) {
                             Toast.makeText(getApplicationContext(), "Password correct", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent();
-                            EnterPassword.this.setResult(RESULT_OK, intent);
-                            finish();
+                            dismissOverlay();
 
                         }
-                        else {
-                            resetActivity();
-                        }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -79,15 +115,11 @@ public class EnterPassword extends AppCompatActivity {
             }
         });
     }
-    private void resetActivity() {
-        Toast.makeText(this, "Password incorrect", Toast.LENGTH_LONG).show();
-        recreate();
-    }
     private boolean CheckPassword() throws Exception {
         SharedPreferences sharedPreferences = getSharedPreferences("password", Context.MODE_PRIVATE);
         String savedText = sharedPreferences.getString("password", "");
         @SuppressLint("DefaultLocale") String message1 = String.format(coordinatePassword.toString());
-        Log.d(EnterPassword.DEBUGTAG, message1);
+        Log.d(OverlayService.DEBUGTAG, message1);
         coordinatePassword = decryptCoordinateString(savedText, INPUT_PASSWORD);
         return isPointsWithinRadius(coordinateList,coordinatePassword,100);
     }
@@ -133,7 +165,7 @@ public class EnterPassword extends AppCompatActivity {
             coordinateList.add(new Point(x, y));
         }
         @SuppressLint("DefaultLocale") String message1 = String.format(coordinateList.toString());
-        Log.d(EnterPassword.DEBUGTAG, message1);
+        Log.d(OverlayService.DEBUGTAG, message1);
         // Trả về danh sách các điểm đã giải mã
         return coordinateList;
     }
@@ -146,11 +178,11 @@ public class EnterPassword extends AppCompatActivity {
         return secretKeySpec;
     }
     private void drawCircleAroundPoint(Point point) {
-        ImageView imageView = findViewById(R.id.touch_img);
+        ImageView imageView = overlayView.findViewById(R.id.touch_img);
         Bitmap bitmap = Bitmap.createBitmap(imageView.getWidth(), imageView.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         imageView.draw(canvas);
-
+        Log.i("touch","click");
         Paint paint = new Paint();
         paint.setColor(Color.RED);
         paint.setStyle(Paint.Style.STROKE);
@@ -160,5 +192,10 @@ public class EnterPassword extends AppCompatActivity {
         canvas.drawCircle(point.x, point.y, 75, paint);
         imageView.setImageBitmap(bitmap);
     }
-
+    private void dismissOverlay() {
+        if (windowManager != null && overlayView != null) {
+            windowManager.removeView(overlayView);
+            stopSelf();
+        }
+    }
 }

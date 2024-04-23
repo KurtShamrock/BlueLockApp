@@ -20,6 +20,7 @@ public class SetWallpaper extends AppCompatActivity {
     ImageView imageView;
     Button set;
     public static final int FLAG_FULLSCREEN = 1024;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
