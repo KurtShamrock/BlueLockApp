@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/wallpaper"
+        android:icon="@drawable/vectorhome"
+        android:title="" />
+    <item
+        android:id="@+id/setPass"
+        android:icon="@drawable/vectorfix"
+        android:title="" />
+
+    <item
+        android:id="@+id/gallery"
+        android:icon="@drawable/vectorprofile"
+        android:title="" />
+</menu>
