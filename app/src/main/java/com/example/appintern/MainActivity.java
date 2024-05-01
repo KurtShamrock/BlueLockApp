@@ -18,8 +18,9 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button btn = (Button)findViewById(R.id.setPassword);
-        btn.setOnClickListener(new View.OnClickListener() {
+        Button setPassBtn = (Button)findViewById(R.id.setPassword);
+        Button setWallBtn = (Button)findViewById(R.id.setWallpaper);
+        setPassBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SharedPreferences sharedPreferences = getSharedPreferences("password", MODE_PRIVATE);
@@ -29,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     startActivity(new Intent(MainActivity.this, EnterPassword.class));
                 }
+            }
+        });
+        setWallBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, WallpaperApp.class));
             }
         });
     }

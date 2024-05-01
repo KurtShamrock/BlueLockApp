@@ -22,6 +22,12 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+    ndkVersion = "25.1.8937393"
+    externalNativeBuild {
+        ndkBuild {
+            path ("src/main/jni/Android.mk")//path of Android.mk file
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -29,6 +35,9 @@ android {
 }
 
 dependencies {
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")

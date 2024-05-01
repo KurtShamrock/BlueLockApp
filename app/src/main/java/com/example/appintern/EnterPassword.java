@@ -31,7 +31,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class EnterPassword extends AppCompatActivity {
     private static final String DEBUGTAG = "JWP";
-    private static final String INPUT_PASSWORD = "not a password";
+    static {
+        System.loadLibrary("keys");
+    }
+    public static native String getKeys();
+    private static final String INPUT_PASSWORD = getKeys();
     String AES = "AES";
     private static final int MAX_COORDINATES = 4;
     private List<Point> coordinateList;

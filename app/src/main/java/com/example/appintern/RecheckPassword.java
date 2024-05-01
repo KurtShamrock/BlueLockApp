@@ -28,9 +28,14 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 public class RecheckPassword extends AppCompatActivity {
+    static {
+        System.loadLibrary("keys");
+    }
+    public static native String getKeys();
+    private static final String INPUT_PASSWORD = getKeys();
     private static final String DEBUGTAG = "JWP";
     private static final int MAX_COORDINATES = 4;
-    private static final String INPUT_PASSWORD = "not a password";
+
     String AES = "AES";
     private List<Point> coordinateList2;
     private List<Point> coordinateList1 = new ArrayList<>();
