@@ -1,12 +1,15 @@
 package com.example.appintern;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,14 +20,21 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 public class RecheckPassword extends AppCompatActivity {
     private static final String DEBUGTAG = "JWP";
     private static final int MAX_COORDINATES = 4;
+    private static final String INPUT_PASSWORD = "not a password";
+    String AES = "AES";
     private List<Point> coordinateList2;
     private List<Point> coordinateList1 = new ArrayList<>();
+    String outputString;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,7 +58,12 @@ public class RecheckPassword extends AppCompatActivity {
                 if (coordinateList2.size() == MAX_COORDINATES) {
                     boolean withinRadius = isPointsWithinRadius(coordinateList1, coordinateList2, 100);
                     if(withinRadius) {
-                        goToDisplayCoordinates();
+                        try {
+                            saveNewPassword();
+                            finish();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                     else {
                         resetActivity();
@@ -68,12 +83,10 @@ public class RecheckPassword extends AppCompatActivity {
             Point point1 = coordinateList1.get(i);
             Point point2 = coordinateList2.get(i);
 
-            // Tính khoảng cách giữa hai điểm
             double distance = distanceBetweenPoints(point1, point2);
 
-            // Kiểm tra xem khoảng cách có nhỏ hơn bán kính cho phép không
             if (distance > radiusInPixels) {
-                return false; // Nếu một điểm nằm ngoài phạm vi, trả về false ngay lập tức
+                return false;
             }
         }
         return true;
@@ -82,11 +95,14 @@ public class RecheckPassword extends AppCompatActivity {
         // Tính khoảng cách giữa hai điểm sử dụng công thức Euclid
         return Math.sqrt(Math.pow((point2.x - point1.x), 2) + Math.pow((point2.y - point1.y), 2));
     }
-    private void goToDisplayCoordinates() {
-        Intent intent = new Intent(this, DisplayCoordinate.class);
-        intent.putExtra("CoordinateList", new ArrayList<>(coordinateList1));
-        startActivity(intent);
-        finish();
+    private void saveNewPassword() throws Exception {
+        SharedPreferences sharedPreferences = getSharedPreferences("password", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        outputString = encryptCoordinateList(coordinateList1, INPUT_PASSWORD);
+        String textToSave = outputString;
+        editor.putString("password", textToSave);
+        editor.apply();
+        Toast.makeText(this, "Set password successfully", Toast.LENGTH_LONG).show();
     }
     private void drawCircleAroundPoint(Point point) {
         ImageView imageView = findViewById(R.id.touch_img);
@@ -109,5 +125,23 @@ public class RecheckPassword extends AppCompatActivity {
 //        imageView.setImageBitmap(null);
         Toast.makeText(this, "Incorrect", Toast.LENGTH_LONG).show();
         recreate();
+    }
+    private String encryptCoordinateList(List<Point> coordinateList, String password) throws Exception {
+        // Chuyển đổi danh sách điểm thành chuỗi
+        String coordinateString = coordinateList.toString();
+        // Mã hóa chuỗi bằng AES9
+        SecretKeySpec key = generateKey(password);
+        Cipher c = Cipher.getInstance(AES);
+        c.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encVal = c.doFinal(coordinateString.getBytes());
+        return Base64.encodeToString(encVal, Base64.DEFAULT);
+    }
+    private SecretKeySpec generateKey(String password) throws Exception {
+        final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] bytes = password.getBytes("UTF-8");
+        digest.update(bytes, 0, bytes.length);
+        byte[] key = digest.digest();
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+        return secretKeySpec;
     }
 }

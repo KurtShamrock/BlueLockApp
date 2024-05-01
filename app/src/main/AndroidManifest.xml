@@ -24,7 +24,7 @@
         <activity android:name=".DisplayCoordinate"></activity>
         <activity android:name=".EnterPassword"></activity>
         <activity android:name=".RecheckPassword"></activity>
-
+        <activity android:name=".NewPassword"></activity>
     </application>
 
 </manifest>

@@ -26,7 +26,7 @@ import javax.crypto.spec.SecretKeySpec;
 import android.graphics.Point;
 
 public class DisplayCoordinate  extends AppCompatActivity {
-    private static final String INPUT_PASSWORD = "hehehehe";
+    private static final String INPUT_PASSWORD = "not a password";
     TextView outputText;
     Button encBtn, decBtn;
     String outputString;
@@ -50,7 +50,7 @@ public class DisplayCoordinate  extends AppCompatActivity {
         encBtn = (Button) findViewById(R.id.encBtn);
         decBtn = (Button) findViewById(R.id.decBtn);
         outputText.setTextIsSelectable(true);
-        SharedPreferences sharedPreferences = getSharedPreferences("notData", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences("password", Context.MODE_PRIVATE);
 
         encBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,11 +63,11 @@ public class DisplayCoordinate  extends AppCompatActivity {
                         setPassword = true;
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         String textToSave = outputString;
-                        editor.putString("key", textToSave);
+                        editor.putString("password", textToSave);
                         editor.apply();
                     }
                     else {
-                        String savedText = sharedPreferences.getString("key", "");
+                        String savedText = sharedPreferences.getString("password", "");
                         String newText = outputString;
                         if (newText.equals(savedText)) {
                             Toast.makeText(getApplicationContext(), "Correct", Toast.LENGTH_SHORT).show();
@@ -124,7 +124,7 @@ public class DisplayCoordinate  extends AppCompatActivity {
     private String encryptCoordinateList(List<Point> coordinateList, String password) throws Exception {
         // Chuyển đổi danh sách điểm thành chuỗi
         String coordinateString = coordinateList.toString();
-        // Mã hóa chuỗi bằng AES
+        // Mã hóa chuỗi bằng AES9
         SecretKeySpec key = generateKey(password);
         Cipher c = Cipher.getInstance(AES);
         c.init(Cipher.ENCRYPT_MODE, key);
