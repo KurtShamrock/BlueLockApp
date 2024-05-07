@@ -51,6 +51,8 @@ public class OverlayService extends Service {
     String AES = "AES";
     private static final int MAX_COORDINATES = 4;
     private List<Point> coordinateList;
+    LayoutInflater inflater;
+    WindowManager.LayoutParams params;
     private List<Point> coordinatePassword = new ArrayList<>();
 
     @Override
@@ -63,7 +65,7 @@ public class OverlayService extends Service {
     @SuppressLint("InflateParams")
     private void showOverlay() {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+        params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -71,7 +73,7 @@ public class OverlayService extends Service {
                 PixelFormat.OPAQUE);
         params.x=0;
         params.y=0;
-        LayoutInflater inflater = LayoutInflater.from(this);
+        inflater = LayoutInflater.from(this);
         overlayView = inflater.inflate(R.layout.overlay_layout, null);
         coordinateList = new ArrayList<>();
         addTouchListener();
@@ -102,9 +104,19 @@ public class OverlayService extends Service {
                     try {
                         boolean isPass = CheckPassword();
                         if(isPass) {
-                            Toast.makeText(getApplicationContext(), "Password correct", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Password correct", Toast.LENGTH_LONG).show();
                             dismissOverlay();
 
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Password incorrect", Toast.LENGTH_SHORT).show();
+                            if (windowManager != null && overlayView != null) {
+                                windowManager.removeView(overlayView);
+                                overlayView = inflater.inflate(R.layout.overlay_layout, null);
+                                windowManager.addView(overlayView, params);
+                                coordinateList = new ArrayList<>();
+                                Log.i("win","not null");
+                                addTouchListener();
+                            }
                         }
 
                     } catch (Exception e) {
